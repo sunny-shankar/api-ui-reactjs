@@ -1,17 +1,28 @@
 import axios from "axios";
-// import { useState } from "react";
+import { useState } from "react";
 
 const Column = ({ apiObj }) => {
-  const [response, setResponse] = useState("");
+  const [response, setResponse] = useState();
+  const [err, setError] = useState();
 
   const getStatusFromCode = (statusCode) => {
-    let status = "false";
+    let status = "error";
     if (statusCode === 200) {
-      status = "success";
+      status = "Success";
     }
     return status;
   };
-  const requestHandlerUp = (url, method) => {
+
+  const getButtonColor = (statusCode) => {
+    let response;
+    if (statusCode === 200) {
+      response = "btn btn-success mx-5";
+    } else {
+      response = "btn btn-error mx-5";
+    }
+    return response;
+  };
+  const requestHandler = async (url, method) => {
     const instance = axios.create();
 
     instance.interceptors.request.use((config) => {
@@ -26,45 +37,66 @@ const Column = ({ apiObj }) => {
       return response;
     });
     const config = { method: method, url: url };
-    return instance(config);
+
+    instance(config)
+      .then((res) => {
+        setResponse(res);
+      })
+      .catch((err) => {
+        setError(err);
+      });
   };
   return (
-    <div className="container mx-auto">
-      <button
-        className="btn btn-secondary mx-10"
-        onClick={async () => {
-          let response;
-
-          response = await requestHandlerUp(apiObj["url"], "get")
-            .then((response) => response)
-            .catch((error) => {
-              console.log(error.status);
-            });
-          console.log(response);
-          document.getElementById("response").value = JSON.stringify(
-            response.data
-          );
-          console.log(response.status);
-          document.getElementById(
-            "responseStatus"
-          ).innerHTML = `<b>Status:</b> ${
-            response.status
-          } - ${getStatusFromCode(response.status)}`;
-          document.getElementById(
-            "responseTime"
-          ).innerHTML = `Response Time: ${response.headers["request-duration"]} ms`;
-        }}
-      >
-        {apiObj["name"]}
-      </button>
-      <input
-        readOnly
-        type="text"
-        id="response"
-        className="input input-bordered input-lg w-full max-w-xs box-content"
-      />
-      <span id="responseStatus" className="mx-10"></span>
-      <span id="responseTime" className="mx-10"></span>
+    <div className="main mx-auto border my-5 py-4 px-10 shadow-lg rounded">
+      <div className="container flex items-center justify-between my-5">
+        <button
+          className={
+            response ? getButtonColor(response.status) : "btn btn-primary mx-5"
+          }
+          onClick={() => {
+            requestHandler(apiObj["url"], "get");
+          }}
+        >
+          {apiObj["name"]}
+        </button>
+        <input
+          readOnly
+          type="text"
+          id="response"
+          className="input input-bordered input-lg w-full max-w-xs box-content"
+          value={response ? JSON.stringify(response.data) : ""}
+        />
+        <span id="responseStatus" className="mx-5">
+          {response
+            ? `Status Code: ${response.status} - [${getStatusFromCode(
+                response.status
+              )}]`
+            : ""}
+        </span>
+        <span id="responseTime" className="mx-5">
+          {response
+            ? `Response Time: ${response.headers["request-duration"]} ms`
+            : ""}
+        </span>
+      </div>
+      <div className={err ? "alert alert-error shadow-lg" : "hidden"}>
+        <div>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="stroke-current flex-shrink-0 h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+          <span>{err ? err.message : ""}</span>
+        </div>
+      </div>
     </div>
   );
 };

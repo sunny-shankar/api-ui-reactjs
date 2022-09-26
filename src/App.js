@@ -2,15 +2,21 @@ import Column from "./components/Column";
 function App() {
   const apiObjs = [
     {
-      url: "https://gorest.co.in/public/v2/users",
-      name: "Test API",
+      url: "https://gorest.co.in/public/v2/users/",
+      name: "Public API",
+    },
+    {
+      url: "https://gorest.co.in/public/v2/users/wqjhged",
+      name: "Public API [Error]",
     },
   ];
   return (
     <div className="App">
-      {apiObjs.map((api) => {
-        return <Column apiObj={api} />;
-      })}
+      <div className="py-10">
+        {apiObjs.map((api, key) => {
+          return <Column apiObj={api} key={key} />;
+        })}
+      </div>
     </div>
   );
 }

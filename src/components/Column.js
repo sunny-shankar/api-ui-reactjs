@@ -1,10 +1,8 @@
 import axios from "axios";
+// import { useState } from "react";
 
-const Column = () => {
-  const apiObj = {
-    url: "https://gorest.co.in/public/v2/users",
-    name: "Test API",
-  };
+const Column = ({ apiObj }) => {
+  const [response, setResponse] = useState("");
 
   const getStatusFromCode = (statusCode) => {
     let status = "false";
@@ -42,7 +40,7 @@ const Column = () => {
             .catch((error) => {
               console.log(error.status);
             });
-
+          console.log(response);
           document.getElementById("response").value = JSON.stringify(
             response.data
           );
